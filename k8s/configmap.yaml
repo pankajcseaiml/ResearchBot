@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: researchbot-config
+  labels:
+    app.kubernetes.io/name: researchbot
+    app.kubernetes.io/part-of: genai-devops-coursework
+data:
+  GROQ_MODEL: "llama-3.3-70b-versatile"
+  HOST: "0.0.0.0"
+  PORT: "8000"
+  REQUEST_TIMEOUT: "60"
+  MAX_QUESTION_LENGTH: "5000"
+  MAX_RESEARCH_RESULTS: "5"

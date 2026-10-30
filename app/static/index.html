@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="ResearchBot — Educational Multi-Agent Research & Analysis Assistant powered by FastAPI, Agno Team, and Groq." />
+  <title>ResearchBot — Multi-Agent Research & Analysis Assistant</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="/static/style.css" />
+
+  <!-- Safe Markdown and Sanitization Libraries (with native fallback) -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.11/dist/purify.min.js"></script>
+</head>
+<body>
+  <!-- Header Banner -->
+  <header class="app-header" role="banner">
+    <div class="header-container">
+      <div class="brand">
+        <span class="brand-icon" aria-hidden="true">🔬</span>
+        <div>
+          <h1 class="brand-title">ResearchBot</h1>
+          <p class="brand-subtitle">Multi-Agent Research &amp; Analysis Assistant</p>
+        </div>
+      </div>
+      
+      <div class="header-status">
+        <div id="system-status-pill" class="status-pill status-loading" title="Checking system status">
+          <span class="status-dot"></span>
+          <span id="system-status-text">Connecting...</span>
+        </div>
+        <span id="model-tag" class="model-badge">llama-3.3-70b-versatile</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Layout -->
+  <main class="main-container" role="main">
+    
+    <!-- Multi-Agent Architecture Ribbon -->
+    <section class="agents-ribbon" aria-label="Coordinating Agents">
+      <div class="agent-step">
+        <span class="step-num">1</span>
+        <div class="step-info">
+          <strong>Research Query Analyzer</strong>
+          <span>Domain, Objectives &amp; Plan</span>
+        </div>
+      </div>
+      <div class="step-arrow" aria-hidden="true">→</div>
+      <div class="agent-step">
+        <span class="step-num">2</span>
+        <div class="step-info">
+          <strong>Research &amp; Analysis Agent</strong>
+          <span>Curated Library &amp; Evidence</span>
+        </div>
+      </div>
+      <div class="step-arrow" aria-hidden="true">→</div>
+      <div class="agent-step">
+        <span class="step-num">3</span>
+        <div class="step-info">
+          <strong>Research Answer Reviewer</strong>
+          <span>Verification &amp; Structured Report</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Global Alert Box -->
+    <div id="alert-banner" class="alert-banner hidden" role="alert" aria-live="polite">
+      <span class="alert-icon" id="alert-icon">⚠️</span>
+      <div class="alert-content">
+        <strong id="alert-title">Notice</strong>
+        <p id="alert-message"></p>
+      </div>
+      <button id="alert-close" class="alert-close" aria-label="Dismiss alert">&times;</button>
+    </div>
+
+    <!-- Research Input Section -->
+    <section class="card input-card" aria-labelledby="input-heading">
+      <div class="card-header">
+        <h2 id="input-heading" class="card-title">Research Investigation Query</h2>
+        <span class="hint-text">Agno Team coordination with local evidence grounding</span>
+      </div>
+
+      <form id="research-form" novalidate>
+        <div class="form-group">
+          <label for="question-input" class="sr-only">Research Question</label>
+          <textarea
+            id="question-input"
+            name="question"
+            rows="4"
+            placeholder="Enter your research question (e.g. 'What are the benefits, limitations, and practical applications of Retrieval-Augmented Generation in AI systems?')..."
+            maxlength="5000"
+            required
+            aria-describedby="char-count input-help"
+          ></textarea>
+        </div>
+
+        <div class="form-footer">
+          <div class="footer-left">
+            <span id="char-count" class="char-count">0 / 5,000</span>
+            <span id="input-help" class="help-text">Press <kbd>Ctrl</kbd> + <kbd>Enter</kbd> to submit</span>
+          </div>
+          <div class="button-group">
+            <button type="button" id="btn-clear" class="btn btn-secondary">Clear</button>
+            <button type="submit" id="btn-submit" class="btn btn-primary">
+              <span class="btn-text">Investigate Question</span>
+              <span class="btn-spinner hidden" aria-hidden="true"></span>
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <!-- Suggested Research Prompts -->
+      <div class="suggested-topics">
+        <span class="suggested-label">Suggested research topics:</span>
+        <div class="chips-container" role="group" aria-label="Suggested topics">
+          <button type="button" class="topic-chip" data-query="What are the benefits, limitations, and practical applications of Retrieval-Augmented Generation in AI systems?">
+            RAG Architectures &amp; Trade-offs
+          </button>
+          <button type="button" class="topic-chip" data-query="Compare microservices and serverless architectures in terms of cold starts, resilience, and operational cost.">
+            Microservices vs. Serverless
+          </button>
+          <button type="button" class="topic-chip" data-query="Explain Zero Trust cybersecurity principles, micro-segmentation, and least privilege access.">
+            Zero Trust Security
+          </button>
+          <button type="button" class="topic-chip" data-query="What are the privacy guarantees and utility trade-offs of Differential Privacy and Federated Learning?">
+            Privacy-Preserving ML
+          </button>
+          <button type="button" class="topic-chip" data-query="How do MLOps pipelines detect data drift and concept drift in continuous deployment?">
+            MLOps Drift Detection
+          </button>
+          <button type="button" class="topic-chip" data-query="What strategies enable carbon-aware scheduling and energy-efficient data center computing?">
+            Sustainable Computing
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Loading / Execution Progress State -->
+    <section id="progress-section" class="card progress-card hidden" aria-live="polite">
+      <div class="progress-header">
+        <div class="spinner-ring" aria-hidden="true"></div>
+        <div>
+          <h3 id="progress-heading" class="progress-title">Multi-Agent Research in Progress</h3>
+          <p id="progress-subtitle" class="progress-sub">Coordinating Agno agents under TeamMode.coordinate...</p>
+        </div>
+      </div>
+      
+      <div class="progress-pipeline">
+        <div class="pipeline-step step-active" id="pipe-step-1">
+          <span class="pipe-indicator"></span>
+          <div class="pipe-text">
+            <strong>Phase 1: Query Analysis</strong>
+            <span class="pipe-detail">Classifying domain, objectives, and retrieval keywords</span>
+          </div>
+        </div>
+        <div class="pipeline-step" id="pipe-step-2">
+          <span class="pipe-indicator"></span>
+          <div class="pipe-text">
+            <strong>Phase 2: Evidence Gathering</strong>
+            <span class="pipe-detail">Searching curated local library &amp; evaluating findings</span>
+          </div>
+        </div>
+        <div class="pipeline-step" id="pipe-step-3">
+          <span class="pipe-indicator"></span>
+          <div class="pipe-text">
+            <strong>Phase 3: Review &amp; Synthesis</strong>
+            <span class="pipe-detail">Cross-checking citations &amp; generating Markdown report</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Research Results Section -->
+    <section id="results-section" class="card results-card hidden" aria-labelledby="results-heading">
+      <div class="card-header results-header">
+        <div>
+          <div class="header-badge">Synthesized Research Report</div>
+          <h2 id="results-heading" class="card-title">Investigation Results</h2>
+        </div>
+        <div class="action-buttons">
+          <button type="button" id="btn-copy" class="btn btn-sm btn-secondary" title="Copy Markdown answer to clipboard">
+            <span id="copy-icon">📋</span> <span id="copy-text">Copy Report</span>
+          </button>
+          <button type="button" id="btn-new-research" class="btn btn-sm btn-primary">
+            New Research
+          </button>
+        </div>
+      </div>
+
+      <!-- Question Recall -->
+      <div class="question-callout">
+        <strong>Research Question:</strong>
+        <p id="display-question"></p>
+      </div>
+
+      <!-- Consulted Sources Panel -->
+      <div class="sources-panel" id="sources-panel">
+        <h3 class="sources-title">
+          <span>📚 Sources Consulted</span>
+          <span id="sources-count" class="sources-count-badge">0 sources</span>
+        </h3>
+        <ul id="sources-list" class="sources-list"></ul>
+      </div>
+
+      <!-- Markdown Report Body -->
+      <div id="report-output" class="markdown-body" tabindex="0" role="region" aria-label="Research Findings"></div>
+
+      <!-- Educational Disclaimer Banner -->
+      <div class="disclaimer-box" role="note">
+        <div class="disclaimer-header">
+          <span class="disclaimer-icon">⚖️</span>
+          <strong>Educational &amp; Research Use Disclaimer</strong>
+        </div>
+        <p id="disclaimer-text">
+          Disclaimer: ResearchBot is an educational research and analysis assistant designed for learning and demonstration. Its output may contain mistakes, incomplete information, or outdated findings. Results are limited by the sources available to the system and do not replace independent verification, professional judgment, or consultation with qualified experts where appropriate.
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="app-footer" role="contentinfo">
+    <div class="footer-container">
+      <p>ResearchBot &bull; GenAI &amp; ML DevOps Coursework &bull; Built with FastAPI, Agno &amp; Groq</p>
+      <div class="footer-links">
+        <a href="/docs" target="_blank" rel="noopener">Interactive API Docs (Swagger)</a>
+        <span class="divider">&bull;</span>
+        <a href="/health" target="_blank" rel="noopener">Health Endpoint</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

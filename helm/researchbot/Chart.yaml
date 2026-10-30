@@ -1,0 +1,15 @@
+apiVersion: v2
+name: researchbot
+description: Production Helm chart for ResearchBot — Multi-Agent Research Assistant
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - genai
+  - agentic-ai
+  - fast-api
+  - agno
+  - groq
+maintainers:
+  - name: Pankaj
+    email: pankajgovekar52@gmail.com

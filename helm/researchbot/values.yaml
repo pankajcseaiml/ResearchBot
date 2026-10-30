@@ -1,0 +1,73 @@
+# Default values for researchbot Helm chart.
+
+replicaCount: 2
+
+image:
+  repository: researchbot
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: false
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8000
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
+  hosts:
+    - host: researchbot.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1024Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 75
+  targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+config:
+  groqModel: "llama-3.3-70b-versatile"
+  host: "0.0.0.0"
+  port: 8000
+  requestTimeout: 60
+  maxQuestionLength: 5000
+  maxResearchResults: 5
+
+secret:
+  groqApiKey: "replace_with_actual_groq_api_key"

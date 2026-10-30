@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "researchbot.fullname" . }}-config
+  labels:
+    {{- include "researchbot.labels" . | nindent 4 }}
+data:
+  GROQ_MODEL: {{ .Values.config.groqModel | quote }}
+  HOST: {{ .Values.config.host | quote }}
+  PORT: {{ .Values.config.port | quote }}
+  REQUEST_TIMEOUT: {{ .Values.config.requestTimeout | quote }}
+  MAX_QUESTION_LENGTH: {{ .Values.config.maxQuestionLength | quote }}
+  MAX_RESEARCH_RESULTS: {{ .Values.config.maxResearchResults | quote }}
